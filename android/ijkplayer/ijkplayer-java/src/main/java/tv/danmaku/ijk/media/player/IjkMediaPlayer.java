@@ -23,8 +23,9 @@ import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
-import android.graphics.SurfaceTexture;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.graphics.SurfaceTexture;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.RingtoneManager;
@@ -42,11 +43,15 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Locale;
@@ -245,6 +250,8 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
          * create it here than in C++.
          */
         native_setup(new WeakReference<IjkMediaPlayer>(this));
+
+        mPreviewCallback = mPreviewCallback_test;
     }
 
     private native void _setFrameAtTime(String imgCachePath, long startTime, long endTime, int num, int imgDefinition)
@@ -1050,6 +1057,12 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
                         player.mVideoSarNum, player.mVideoSarDen);
                 break;
 
+            case MEDIA_VIDEO_FRAME_AVAILABLE:
+                if (player.mPreviewCallback != null && msg.obj != null) {
+                    player.mPreviewCallback.onPreviewFrame(msg.arg1, msg.arg2, (byte[]) msg.obj);
+                }
+                break;
+
             default:
                 DebugLog.e(TAG, "Unknown message type " + msg.what);
             }
@@ -1284,4 +1297,48 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static native void native_profileBegin(String libName);
     public static native void native_profileEnd();
     public static native void native_setLogLevel(int level);
+
+
+    public interface PreviewCallback
+    {
+        void onPreviewFrame(int w, int h, byte[] data);
+    };
+
+    public PreviewCallback mPreviewCallback;
+    static long count = 0;
+    static long lastTime = 0;
+    public static PreviewCallback mPreviewCallback_test = new PreviewCallback() {
+        @Override
+        public void onPreviewFrame(int w, int h, byte[] data) {
+//            Log.d("ZLJ", "" + w + "*" + h + "," + data.length);
+//            Bitmap bitmap = Bitmap.createBitmap(w, h , Bitmap.Config.ARGB_8888);
+//            ByteBuffer buffer = ByteBuffer.wrap(data);
+//            bitmap.copyPixelsFromBuffer(buffer);
+//
+//            File desFile = new File("/sdcard/Pictures/xxx" + count + ".jpg");
+//            FileOutputStream fos = null;
+//            BufferedOutputStream bos = null;
+//            try {
+//                fos = new FileOutputStream(desFile);
+//                bos = new BufferedOutputStream(fos);
+//                bitmap.compress(Bitmap.CompressFormat.JPEG, 50, bos);
+//                bos.flush();
+//                bos.close();
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+            long curTime = System.currentTimeMillis();
+            count++;
+            if (curTime - lastTime >= 1000) {
+                Log.w("ZLJ", "fps: " + count);
+                lastTime = curTime;
+                count = 0;
+            }
+        }
+    };
+
+
+    public final void setPreviewCallback(PreviewCallback cb) {
+        mPreviewCallback = cb;
+    }
 }

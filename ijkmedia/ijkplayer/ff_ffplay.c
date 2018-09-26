@@ -36,6 +36,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "libavutil/avstring.h"
 #include "libavutil/eval.h"
@@ -76,6 +77,7 @@
 #include <stdatomic.h>
 #if defined(__ANDROID__)
 #include "ijksoundtouch/ijksoundtouch_wrap.h"
+#include "libyuv.h"
 #endif
 
 #ifndef AV_CODEC_FLAG2_FAST
@@ -869,6 +871,105 @@ static size_t parse_ass_subtitle(const char *ass, char *output)
     return 0;
 }
 
+static int ijk_YV12ToARGB(SDL_VoutOverlay *overlay, void *dst_argb)
+{
+    return I420ToARGB(
+        overlay->pixels[0], overlay->pitches[0],
+        overlay->pixels[2], overlay->pitches[2],
+        overlay->pixels[1], overlay->pitches[1],
+        dst_argb, overlay->w*4,
+        overlay->w, overlay->h
+    );
+}
+
+static int ijk_RV16ToARGB(SDL_VoutOverlay *overlay, void *dst_argb)
+{
+    return RGB565ToARGB(
+        overlay->pixels[0], overlay->pitches[0],
+        dst_argb, overlay->w*4,
+        overlay->w, overlay->h
+    );
+}
+
+static int ijk_RV32ToARGB(SDL_VoutOverlay *overlay, void *dst_argb)
+{
+    return ABGRToARGB(
+        overlay->pixels[0], overlay->pitches[0],
+        dst_argb, overlay->w*4,
+        overlay->w, overlay->h
+    );
+}
+
+static int ijk_ConvertARGB(SDL_VoutOverlay *overlay, void *dst_argb)
+{
+    int ret;
+    int format = overlay->format;
+    int dst_size = overlay->w * overlay->h * 32;
+
+    if (format == SDL_FCC_YV12) {
+        //printf("format: SDL_FCC_YV12 \n");
+        ret = ijk_YV12ToARGB(overlay, dst_argb);
+    } else if (format == SDL_FCC_RV16) {
+        //printf("format: SDL_FCC_RV16 \n");
+        ret = ijk_RV16ToARGB(overlay, dst_argb);
+    } else if (format == SDL_FCC_RV32) {
+        //printf("format: SDL_FCC_RV32 \n");
+        ret = ijk_RV32ToARGB(overlay, dst_argb);
+    } else {
+        ret = -1;
+    }
+
+    //printf("ret: %d\n", ret);
+
+    return ret;
+}
+
+static int ijk_ConvertRGBA(SDL_VoutOverlay *overlay, void *dst_rgba)
+{
+    int ret;    
+    int dst_size = overlay->w * overlay->h * 32;
+    uint8_t *dst_argb = (uint8_t *)malloc(dst_size);
+    
+    if (ijk_ConvertARGB(overlay, dst_argb) == 0)
+    {
+        ret = ARGBToRGBA(
+            dst_argb, overlay->w*4,
+            dst_rgba, overlay->w*4,
+            overlay->w, overlay->h
+        );    
+    }
+    free(dst_argb);
+    return ret;
+}
+
+static long count = 0;
+static long timeStampStart = 0;
+
+static void frame_available(FFPlayer *ffp, SDL_VoutOverlay *overlay)
+{
+
+    if (count == 0) {
+        timeStampStart = time(NULL);
+    }
+    if (count == 60) {
+        count = 0;
+        float fps = 60.0f/(time(NULL) - timeStampStart);
+        printf("fps_decode: %f\n", fps);
+    } else {
+        count++;
+    }
+
+    int dst_size = overlay->w * overlay->h * 32;
+    uint8_t *dst = (uint8_t *)malloc(dst_size);
+    
+    if (ijk_ConvertARGB(overlay, dst) == 0)
+    {
+        ffp_notify_msg4(ffp, FFP_MSG_VIDEO_FRAME_AVAILABLE, overlay->w, overlay->h, dst, dst_size);
+    }
+
+    free(dst);
+}
+
 static void video_image_display2(FFPlayer *ffp)
 {
     VideoState *is = ffp->is;
@@ -909,6 +1010,7 @@ static void video_image_display2(FFPlayer *ffp)
             }
         }
         SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
+        frame_available(ffp, vp->bmp);
         ffp->stat.vfps = SDL_SpeedSamplerAdd(&ffp->vfps_sampler, FFP_SHOW_VFPS_FFPLAY, "vfps[ffplay]");
         if (!ffp->first_video_frame_rendered) {
             ffp->first_video_frame_rendered = 1;
@@ -928,6 +1030,7 @@ static void video_image_display2(FFPlayer *ffp)
         }
     }
 }
+
 
 // FFP_MERGE: compute_mod
 // FFP_MERGE: video_audio_display

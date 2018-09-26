@@ -1019,6 +1019,27 @@ static void message_loop_n(JNIEnv *env, IjkMediaPlayer *mp)
             MPTRACE("FFP_MSG_AUDIO_SEEK_RENDERING_START:\n");
             post_event(env, weak_thiz, MEDIA_INFO, MEDIA_INFO_AUDIO_SEEK_RENDERING_START, msg.arg1);
             break;
+        case FFP_MSG_VIDEO_FRAME_AVAILABLE:
+            if (msg.obj)
+            {
+                jsize capacity = msg.arg1 * msg.arg2 * 32;
+                jbyteArray out = J4A_NewByteArray__catchAll(env, capacity);
+
+                if (out == NULL) {
+                    ALOGE("Couldn't allocate byte array for argb data");
+                } else {
+                    (*env)->SetByteArrayRegion(env, out, 0, capacity, (jbyte *)msg.obj);
+                }
+                post_event2(env, weak_thiz, MEDIA_VIDEO_FRAME_AVAILABLE, msg.arg1, msg.arg2, out);
+                if (out) {
+                    (*env)->DeleteLocalRef(env, out);
+                }
+
+            } else {
+                ALOGE("argb data is NULL");
+            }
+            break;
+
         default:
             ALOGE("unknown FFP_MSG_xxx(%d)\n", msg.what);
             break;
