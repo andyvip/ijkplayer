@@ -1,0 +1,17 @@
+{
+  "buildFiles": [
+    "/Users/andy/workspace/develop/3rdparty/ijkplayer/android/ijkplayer/ijkplayer-demo/src/main/jni/Android.mk",
+    "/Users/andy/workspace/develop/3rdparty/ijkplayer/android/ijkplayer/ijkplayer-demo/src/main/jni/Application.mk"
+  ],
+  "cleanCommands": [
+    "/Users/andy/workspace/tool/android-sdk/ndk-bundle/ndk-build NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003d/Users/andy/workspace/develop/3rdparty/ijkplayer/android/ijkplayer/ijkplayer-demo/src/main/jni/Android.mk NDK_APPLICATION_MK\u003d/Users/andy/workspace/develop/3rdparty/ijkplayer/android/ijkplayer/ijkplayer-demo/src/main/jni/Application.mk APP_ABI\u003darm64-v8a NDK_ALL_ABIS\u003darm64-v8a NDK_DEBUG\u003d0 APP_PLATFORM\u003dandroid-21 NDK_OUT\u003d/Users/andy/workspace/develop/3rdparty/ijkplayer/android/ijkplayer/ijkplayer-demo/build/intermediates/ndkBuild/release/obj NDK_LIBS_OUT\u003d/Users/andy/workspace/develop/3rdparty/ijkplayer/android/ijkplayer/ijkplayer-demo/build/intermediates/ndkBuild/release/lib clean"
+  ],
+  "libraries": {
+    "squeezencnn-release-arm64-v8a": {
+      "artifactName": "squeezencnn",
+      "buildCommand": "/Users/andy/workspace/tool/android-sdk/ndk-bundle/ndk-build NDK_PROJECT_PATH\u003dnull APP_BUILD_SCRIPT\u003d/Users/andy/workspace/develop/3rdparty/ijkplayer/android/ijkplayer/ijkplayer-demo/src/main/jni/Android.mk NDK_APPLICATION_MK\u003d/Users/andy/workspace/develop/3rdparty/ijkplayer/android/ijkplayer/ijkplayer-demo/src/main/jni/Application.mk APP_ABI\u003darm64-v8a NDK_ALL_ABIS\u003darm64-v8a NDK_DEBUG\u003d0 APP_PLATFORM\u003dandroid-21 NDK_OUT\u003d/Users/andy/workspace/develop/3rdparty/ijkplayer/android/ijkplayer/ijkplayer-demo/build/intermediates/ndkBuild/release/obj NDK_LIBS_OUT\u003d/Users/andy/workspace/develop/3rdparty/ijkplayer/android/ijkplayer/ijkplayer-demo/build/intermediates/ndkBuild/release/lib /Users/andy/workspace/develop/3rdparty/ijkplayer/android/ijkplayer/ijkplayer-demo/build/intermediates/ndkBuild/release/obj/local/arm64-v8a/libsqueezencnn.so",
+      "abi": "arm64-v8a",
+      "output": "/Users/andy/workspace/develop/3rdparty/ijkplayer/android/ijkplayer/ijkplayer-demo/build/intermediates/ndkBuild/release/obj/local/arm64-v8a/libsqueezencnn.so"
+    }
+  }
+}

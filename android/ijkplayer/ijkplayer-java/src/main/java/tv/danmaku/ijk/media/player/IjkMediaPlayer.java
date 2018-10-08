@@ -1310,29 +1310,30 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
     public static PreviewCallback mPreviewCallback_test = new PreviewCallback() {
         @Override
         public void onPreviewFrame(int w, int h, byte[] data) {
-//            Log.d("ZLJ", "" + w + "*" + h + "," + data.length);
-//            Bitmap bitmap = Bitmap.createBitmap(w, h , Bitmap.Config.ARGB_8888);
-//            ByteBuffer buffer = ByteBuffer.wrap(data);
-//            bitmap.copyPixelsFromBuffer(buffer);
-//
-//            File desFile = new File("/sdcard/Pictures/xxx" + count + ".jpg");
-//            FileOutputStream fos = null;
-//            BufferedOutputStream bos = null;
-//            try {
-//                fos = new FileOutputStream(desFile);
-//                bos = new BufferedOutputStream(fos);
-//                bitmap.compress(Bitmap.CompressFormat.JPEG, 50, bos);
-//                bos.flush();
-//                bos.close();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
             long curTime = System.currentTimeMillis();
             count++;
             if (curTime - lastTime >= 1000) {
                 Log.w("ZLJ", "fps: " + count);
                 lastTime = curTime;
                 count = 0;
+            }
+
+            Log.d("ZLJ", "" + w + "*" + h + "," + data.length);
+            Bitmap bitmap = Bitmap.createBitmap(w, h , Bitmap.Config.ARGB_8888);
+            ByteBuffer buffer = ByteBuffer.wrap(data);
+            bitmap.copyPixelsFromBuffer(buffer);
+
+            File desFile = new File("/sdcard/Pictures/xxx" + curTime + ".jpg");
+            FileOutputStream fos = null;
+            BufferedOutputStream bos = null;
+            try {
+                fos = new FileOutputStream(desFile);
+                bos = new BufferedOutputStream(fos);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 50, bos);
+                bos.flush();
+                bos.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     };

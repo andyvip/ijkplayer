@@ -101,6 +101,18 @@
 #define printf(...) ALOGD(__VA_ARGS__)
 #endif
 
+#define __ZLJ__DEBUG__
+#if defined(__ZLJ__DEBUG__)
+#if defined(__ANDROID__)
+#define zljprintf(...) ALOGD(__VA_ARGS__)
+#else
+#define zljprintf(...) printf(__VA_ARGS__)
+#endif
+#else
+#define zljprintf(...)
+#endif
+
+
 #define FFP_IO_STAT_STEP (50 * 1024)
 
 #define FFP_BUF_MSG_PERIOD (3)
@@ -907,19 +919,19 @@ static int ijk_ConvertARGB(SDL_VoutOverlay *overlay, void *dst_argb)
     int dst_size = overlay->w * overlay->h * 32;
 
     if (format == SDL_FCC_YV12) {
-        //printf("format: SDL_FCC_YV12 \n");
         ret = ijk_YV12ToARGB(overlay, dst_argb);
     } else if (format == SDL_FCC_RV16) {
-        //printf("format: SDL_FCC_RV16 \n");
         ret = ijk_RV16ToARGB(overlay, dst_argb);
     } else if (format == SDL_FCC_RV32) {
-        //printf("format: SDL_FCC_RV32 \n");
         ret = ijk_RV32ToARGB(overlay, dst_argb);
     } else {
         ret = -1;
     }
 
-    //printf("ret: %d\n", ret);
+    if (ret == -1)
+    {
+        printf("zlj convert argb failed: format: %d\n", format);
+    }
 
     return ret;
 }
@@ -954,7 +966,7 @@ static void frame_available(FFPlayer *ffp, SDL_VoutOverlay *overlay)
     if (count == 60) {
         count = 0;
         float fps = 60.0f/(time(NULL) - timeStampStart);
-        printf("fps_decode: %f\n", fps);
+        printf("zlj fps_decode: %f\n", fps);
     } else {
         count++;
     }
@@ -972,6 +984,7 @@ static void frame_available(FFPlayer *ffp, SDL_VoutOverlay *overlay)
 
 static void video_image_display2(FFPlayer *ffp)
 {
+    zljprintf("zlj video_image_display2 call\n");
     VideoState *is = ffp->is;
     Frame *vp;
     Frame *sp = NULL;
@@ -1167,6 +1180,7 @@ static void stream_close(FFPlayer *ffp)
 /* display the current picture, if any */
 static void video_display2(FFPlayer *ffp)
 {
+    zljprintf("zlj video_display2 call\n");
     VideoState *is = ffp->is;
     if (is->video_st)
         video_image_display2(ffp);
@@ -1408,6 +1422,7 @@ static void update_video_pts(VideoState *is, double pts, int64_t pos, int serial
 /* called to display each frame */
 static void video_refresh(FFPlayer *opaque, double *remaining_time)
 {
+    zljprintf("zlj video_refresh call\n");
     FFPlayer *ffp = opaque;
     VideoState *is = ffp->is;
     double time;
@@ -3864,9 +3879,11 @@ static int video_refresh_thread(void *arg)
     VideoState *is = ffp->is;
     double remaining_time = 0.0;
     while (!is->abort_request) {
+        zljprintf("zlj video_refresh_thread call\n");
         if (remaining_time > 0.0)
             av_usleep((int)(int64_t)(remaining_time * 1000000.0));
         remaining_time = REFRESH_RATE;
+        zljprintf("zlj aaa %d, %d, %d\n", is->show_mode, is->paused, is->force_refresh);
         if (is->show_mode != SHOW_MODE_NONE && (!is->paused || is->force_refresh))
             video_refresh(ffp, &remaining_time);
     }
