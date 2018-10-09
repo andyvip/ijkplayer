@@ -96,7 +96,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //mUri = Uri.parse("/storage/emulated/0/Movies/forgotten-object.mp4");
-        mUri = Uri.parse("rtsp://192.168.10.101:8554/live.sdp");
+        //mUri = Uri.parse("/storage/emulated/0/Movies/trailer.mp4");
+        mUri = Uri.parse("rtsp://192.168.10.106:8554/live.sdp");
         openVideo();
     }
 

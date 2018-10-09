@@ -26,8 +26,13 @@ LOCAL_C_INCLUDES := $(NCNN_INSTALL_PATH)/install/include
 
 LOCAL_STATIC_LIBRARIES := ncnn
 
-LOCAL_CFLAGS := -O2 -fvisibility=hidden -fomit-frame-pointer -fstrict-aliasing -ffunction-sections -fdata-sections -ffast-math
-LOCAL_CPPFLAGS := -O2 -fvisibility=hidden -fvisibility-inlines-hidden -fomit-frame-pointer -fstrict-aliasing -ffunction-sections -fdata-sections -ffast-math
+#LOCAL_CFLAGS := -O2 -fvisibility=hidden -fomit-frame-pointer -fstrict-aliasing -ffunction-sections -fdata-sections -ffast-math
+#LOCAL_CPPFLAGS := -O2 -fvisibility=hidden -fvisibility-inlines-hidden -fomit-frame-pointer -fstrict-aliasing -ffunction-sections -fdata-sections -ffast-math
+
+
+LOCAL_CFLAGS := -O2 -fomit-frame-pointer -fstrict-aliasing -ffunction-sections -fdata-sections -ffast-math
+LOCAL_CPPFLAGS := -O2 -fomit-frame-pointer -fstrict-aliasing -ffunction-sections -fdata-sections -ffast-math
+
 LOCAL_LDFLAGS += -Wl,--gc-sections
 
 LOCAL_CFLAGS += -fopenmp
